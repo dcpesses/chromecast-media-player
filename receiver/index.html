@@ -1,0 +1,159 @@
+<!-- 
+Copyright (C) 2013 Google Inc. All Rights Reserved. 
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at 
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software 
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and 
+limitations under the License.
+
+
+	RECEIVER PAGE!!!
+
+
+
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Media Player Receiver</title>
+	<meta name="author" content="Danny Pesses">
+	<link href="style.css" rel="stylesheet" type="text/css">
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+	<script type="text/javascript" src="https://www.gstatic.com/cast/js/receiver/1.0/cast_receiver.js"></script>
+	<script type="text/javascript">
+	
+		var appId = '*** YOUR APP ID GOES HERE ***',
+			statInt;
+
+		cast.receiver.logger.setLevelValue(0);
+
+		// Initialize and start the media playing receiver
+		var receiver = new cast.receiver.Receiver(appId, ['Test', cast.receiver.RemoteMedia.NAMESPACE], "", 5);
+
+		// message listener   
+		var channelHandler = new cast.receiver.ChannelHandler('Test');
+		channelHandler.addChannelFactory(receiver.createChannelFactory('Test'));
+
+		// media player
+		var remoteMedia = new cast.receiver.RemoteMedia();
+	    remoteMedia.addChannelFactory(receiver.createChannelFactory(cast.receiver.RemoteMedia.NAMESPACE));
+
+		// start it up
+		receiver.start();
+
+		//listen for messages from chromecast-sender
+		channelHandler.addEventListener(cast.receiver.Channel.EventType.MESSAGE, onMessage.bind(this)); 
+	
+		//add some quick error listeners for debugging
+		remoteMedia.addEventListener(cast.receiver.RemoteMedia.ErrorCode.INVALID_PLAYER_STATE, on_invalid_player_state.bind(this));
+		remoteMedia.addEventListener(cast.receiver.RemoteMedia.ErrorCode.LOAD_FAILED, on_load_failed.bind(this));
+		remoteMedia.addEventListener(cast.receiver.RemoteMedia.ErrorCode.LOAD_CANCELLED, on_load_cancelled.bind(this));
+		remoteMedia.addEventListener(cast.receiver.RemoteMedia.ErrorCode.INVALID_REQUEST, on_invalid_request.bind(this));
+	
+		function on_invalid_player_state(){ console.log("INVALID_PLAYER_STATE: MediaElement not set."); }
+		function on_load_failed(){ console.log("LOAD_FAILED: Failed to load media source"); }
+		function on_load_cancelled(){ console.log("LOAD_CANCELLED: A pending load was cancelled"); }
+		function on_invalid_request(){ console.log("INVALID_REQUEST: The request is invalid"); }
+
+		window.addEventListener('load', function() {
+			var elem = document.getElementById('vid');
+			remoteMedia.setMediaElement(elem);
+		
+			var checkStatus = function() {
+				var status = document.getElementById('status');
+				var st = remoteMedia.getStatus()['state'];
+				document.getElementById('seq').innerHTML = remoteMedia.getStatus()['event_sequence'];
+				document.getElementById('stat').innerHTML = st;
+
+				if (st == 0 || remoteMedia.getStatus()['current_time'] == 0) {
+					status.style.display = 'block';
+				} else {
+					if (st == 1 && remoteMedia.getStatus()['current_time'] > 0) {
+						status.innerHTML = 'Paused...';
+						status.style.display = 'block';
+					} else {
+						status.innerHTML = remoteMedia.getStatus()['current_time'];
+						//status.style.display = 'none';
+						elem.style.display = 'block';
+					}
+				}
+			
+			};
+			statInt = setTimeout(checkStatus, 1000);
+			//statInt = setInterval(checkStatus, 1000);
+		
+			elem.addEventListener("loadedmetadata", function(){
+				var title = remoteMedia.getTitle();
+				var img = remoteMedia.getImageUrl();
+				var info = remoteMedia.getContentInfo();
+			});
+		});
+	
+
+		//Receives events from chromecast-sender
+		function onMessage(event) {	
+			var log = document.getElementById("message");
+			log.innerText = event.message;
+
+		 }	
+
+	</script>
+
+	<script type="text/javascript" charset="utf-8">
+		function _log(args) {
+			if (!!window.console) console.log(args);
+		}
+		function onLoadStartHandler(args) {
+			$('#vid').hide();
+			$('#loading').fadeIn();
+			_log('-onLoadStartHandler');
+		}
+		function onLoadedMetaData(args) {
+			$('#vid').fadeIn();
+			$('#loading').hide();
+			_log('-onLoadedMetaData');
+		}
+		function onPlayHandler(args) {
+			$('#vid').show();
+			$('#loading').hide();
+			_log('-onPlayHandler');
+		}
+		function onEndedHandler(args) {
+			$('#vid').fadeOut();
+			$('#loading').hide();
+			_log('-onEndedHandler');
+		}
+		function onErrorHandler(args) {
+			$('#vid').fadeOut();
+			$('#loading').hide();
+			_log('-onErrorHandler');
+		}
+	</script>
+</head>
+<body>
+	<div id="main">
+		<img id="title-icon" data-screen="ready" src="/resources/images/eureka/cast_icon.png" 
+		style="display: block;background-repeat: no-repeat; height: 95px; left: 92px; position: absolute; top: 118px; width: 110px;">
+		<div id="maintext" style="font-size: 100px;left: 212px;position: absolute;top: 85px;">ready for media</div>
+		<div id="status">	
+			<span id="seq"></span> -- <span id="stat"></span>
+			<pre id="message">Hello world</pre>
+		</div>
+	</div>
+	<video id="vid" width="1280" height="720" allowfullscreen autoplay 
+		onloadstart="onLoadStartHandler();" onloadedmetadata="onLoadedMetaData();" 
+		onplay="onPlayHandler();" onended="onEndedHandler();" onerror="onErrorHandler();" 
+		type="video/mp4">
+	</video>
+	<div id="loading"></div>
+</body>
+</html>

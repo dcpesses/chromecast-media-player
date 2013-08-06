@@ -1,0 +1,74 @@
+/** CSS Reset **/
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td,article, aside, canvas, details, figcaption, figure,  footer, header, hgroup, menu, nav, section, summary, time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display: block; }
+body { line-height: 24px; }
+ol, ul { list-style: none; }
+blockquote, q { quotes: none; }
+blockquote:before, blockquote:after, q:before, q:after {
+	content: '';
+	content: none;
+}
+:focus { 
+	outline-style: dotted;
+	outline-width: thin;
+}
+ins { text-decoration: none; }
+del { text-decoration: line-through; }
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+em { font-style: italic; }
+
+/** End CSS Reset **/
+
+
+	body {
+		background: linear-gradient(to bottom, #2F77BF 0%, #000000 100%);
+		background-size: cover;
+		overflow: hidden;
+		width: 100%;
+		height: 100%;
+		position: relative;
+	}
+	
+	#main {
+/*		padding-top:100%;*/
+	}
+	#status {
+		position:absolute;
+		width:45%;
+		height:25%;
+/*		top:20%;
+		bottom:20%;
+		right:60%;		
+		padding-top:20%;*/
+		padding:50% 0 0;
+		text-align:center;
+		font-family:'Open Sans',Helvetica,Arial,sans-serif;
+		font-size:200%;
+		color:white;
+	}
+	#loading, #vid {
+		position:absolute;
+		top:0;
+		left:0;
+		bottom:0;
+		right:0;
+		display:none;
+	}
+	#loading {
+		background: url(load-spinner.gif) no-repeat fixed center center, linear-gradient(135deg, #45484d 0%, #000000 100%);
+		background-size: 128px 128px, cover;
+		height:1080px;
+		margin:0;
+	}
